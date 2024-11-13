@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected Clients</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        button { padding: 5px 10px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Connected Clients</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Machine</th>
+                <th>Last Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="client-table-body">
+
+        </tbody>
+    </table>
+
+    <script>
+        const socket = io({
+            transports: ['websocket'],
+            upgrade: false
+        });
+
+        function loadInitialClients() {
+            fetch('/get_clients')
+                .then(response => response.json())
+                .then(clients => {
+                    for (const [clientId, clientData] of Object.entries(clients)) {
+                        updateClient({
+                            id: clientId,
+                            ...clientData
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading clients:', error));
+        }
+
+        function updateClient(client) {
+            let row = document.getElementById(client.id);
+            if (!row) {
+                row = document.createElement('tr');
+                row.id = client.id;
+                row.innerHTML = `
+                    <td>${client.username}</td>
+                    <td>${client.machine}</td>
+                    <td>${client.last_active}</td>
+                    <td><button onclick="requestScreenshot('${client.id}')">Screenshot</button></td>
+                `;
+                document.getElementById('client-table-body').appendChild(row);
+            } else {
+                row.cells[0].textContent = client.username;
+                row.cells[1].textContent = client.machine;
+                row.cells[2].textContent = client.last_active;
+            }
+        }
+
+        function requestScreenshot(clientId) {
+            fetch(`/request_screenshot/${clientId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Screenshot requested for client ${clientId}`);
+                    } else {
+                        alert(data.error || 'Failed to request screenshot.');
+                    }
+                })
+                .catch(error => alert('Error requesting screenshot: ' + error));
+        }
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            loadInitialClients();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+        socket.on('update_client', (data) => {
+            updateClient(data);
+        });
+
+        socket.on('screenshot_ready', (data) => {
+            alert(`Screenshot saved for client ${data.client_id}`);
+        });
+
+        document.addEventListener('DOMContentLoaded', loadInitialClients);
+    </script>
+</body>
+</html>
