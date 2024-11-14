@@ -1,6 +1,1 @@
-﻿  main.cpp
-C:\Users\Svyat\source\repos\ClientApp\ClientApp\main.cpp(68,38): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\Svyat\source\repos\ClientApp\ClientApp\main.cpp(129,41): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\Svyat\source\repos\ClientApp\ClientApp\main.cpp(136,67): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\Svyat\source\repos\ClientApp\ClientApp\main.cpp(164,63): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-  ClientApp.vcxproj -> C:\Users\Svyat\source\repos\ClientApp\x64\Debug\ClientApp.exe
+﻿  ClientApp.vcxproj -> C:\Users\Svyat\source\repos\ClientApp\x64\Debug\ClientApp.exe

