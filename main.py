@@ -59,6 +59,10 @@ def handle_client_connection(client_socket, address):
             user_data = dict(item.split(":") for item in client_info.split(", "))
             username = user_data.get("User", "Unknown")
             machine = user_data.get("Machine", "Unknown")
+            domain = user_data.get("Domain", "Unknown")
+            
+            client_ip = address[0]
+            
         except Exception as e:
             print(f"Error parsing client data from {address}: {client_info}")
             return
@@ -66,8 +70,10 @@ def handle_client_connection(client_socket, address):
         client_id = f"{username}@{machine}"
         
         clients[client_id] = {
+            'ip': client_ip,
             'username': username,
             'machine': machine,
+            'domain': domain,
             'last_active': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
         
